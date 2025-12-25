@@ -1,11 +1,21 @@
 'use client';
 
 import Navbar from "@/components/navbar";
+import { Button } from "@/components/ui/button";
+import { useUserBoards } from "@/lib/hooks/userBoards";
 import { useUser } from "@clerk/nextjs";
+import { Plus } from "lucide-react";
 
+// https://sincere-basilisk-57.clerk.accounts.dev
 
 const page = () => {
     const { user } = useUser();
+    const { createBoard } = useUserBoards();
+
+    const handleCreateBoard = async () => {
+        await createBoard({ title: "New Board" });
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
@@ -15,6 +25,10 @@ const page = () => {
                         Welcome back, {user?.firstName ?? user?.emailAddresses[0].emailAddress}! 👋
                     </h1>
                     <p className="text-gray-600">Here`s what`s happening with your boards today.</p>
+                    <Button className="w-full sm:w-auto" onClick={handleCreateBoard}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Board
+                    </Button>
                 </div>
             </main>
         </div>
