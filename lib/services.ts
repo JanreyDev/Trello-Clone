@@ -29,13 +29,18 @@ export const boardService = {
 
 
 export const columnService = {
-    // async getBoard(userId: string): Promise<Board[]> {
-    //     const { data, error } = await supabase.from('boards').select('*').eq('user_id', userId).order('created_at', { ascending: true });
-    //     if (error) {
-    //         throw error;
-    //     }
-    //     return data || [];
-    // },
+    async getBoard(userId: string): Promise<Board[]> {
+        const { data, error } = await supabase
+            .from('boards')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            throw error;
+        }
+        return data || [];
+    },
 
     async createColumn(supabase: SupabaseClient, column: Omit<Column, "id" | "created_at">): Promise<Column> {
         const { data, error } = await supabase
@@ -73,7 +78,9 @@ export const boardDataService = {
 
         await Promise.all(defaultColumns.map(col =>
             columnService.createColumn(supabase, {
-                ...col, board_id: board.id
+                ...col,
+                board_id: board.id,
+                user_id: boardData.userId,
             })
         ));
 

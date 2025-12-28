@@ -13,6 +13,16 @@ export function useUserBoards() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    async function loadBoards() {
+        if (!user) return;
+
+        try {
+
+        } catch () {
+
+        }
+    }
+
     async function createBoard(boardData: {
         title: string
         description?: string

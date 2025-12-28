@@ -1,4 +1,4 @@
-export interface Board{
+export interface Board {
     id: string;
     title: string;
     description: string | null;
@@ -9,21 +9,22 @@ export interface Board{
 }
 
 
-export interface Column{
+export interface Column {
     id: string;
     board_id: string;
     title: string;
     sort_order: number;
     created_at: string;
+    user_id: string;
 }
 
 
-export interface Task{
+export interface Task {
     id: string;
     column_id: string;
     title: string;
     description: string | null;
-    assignee:string | null;
+    assignee: string | null;
     due_date: string | null;
     sort_order: number;
     created_at: string;
