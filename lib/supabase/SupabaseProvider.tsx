@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useEffect, useState } from "react"
+import { createContext, useEffect, useState, useContext } from "react"
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
 import { useAuth } from "@clerk/nextjs"
 
@@ -29,9 +29,17 @@ export default function SupabaseProvider({
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
             {
-                auth: {
-                    accessToken: async () => {
-                        return await getToken({ template: "supabase" })
+                global: {
+                    fetch: async (url, options = {}) => {
+                        const clerkToken = await getToken({ template: "supabase" })
+
+                        const headers = new Headers(options?.headers)
+                        headers.set("Authorization", `Bearer ${clerkToken}`)
+
+                        return fetch(url, {
+                            ...options,
+                            headers,
+                        })
                     },
                 },
             }
@@ -46,3 +54,12 @@ export default function SupabaseProvider({
         </SupabaseContext.Provider>
     )
 }
+
+export const useSupabase = () => {
+    const context = useContext(SupabaseContext);
+    if (context === undefined) {
+        throw new Error("useSupabase needs to be inside the provider");
+    }
+
+    return context;
+};
