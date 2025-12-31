@@ -3,9 +3,10 @@
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useUserBoards } from "@/lib/hooks/userBoards";
 import { useUser } from "@clerk/nextjs";
-import { Grid3X3, List, Loader2, Plus, Rocket, Trello } from "lucide-react";
+import { Filter, Grid3X3, List, Loader2, Plus, Rocket, Search, Trello } from "lucide-react";
 import { useState } from "react";
 
 
@@ -18,9 +19,9 @@ const page = () => {
         await createBoard({ title: "New Board" });
     }
 
-    if (loading) {
-        return <div><Loader2 /><span>Loading your boards...</span></div>
-    }
+    // if (loading) {
+    //     return <div><Loader2 /><span>Loading your boards...</span></div>
+    // }
 
     if (error) {
         return (
@@ -133,8 +134,21 @@ const page = () => {
                                     <List />
                                 </Button>
                             </div>
-
+                            <Button variant={"outline"}>
+                                <Filter />
+                                Filter
+                            </Button>
+                            <Button onClick={handleCreateBoard}>
+                                <Plus />Create Board
+                            </Button>
                         </div>
+                    </div>
+
+
+                    {/* Seach bar */}
+                    <div className="relative mb-4 sm:mb-6">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input id="search" placeholder="Search boards..." className="pl-10" />
                     </div>
                 </div>
             </main>
