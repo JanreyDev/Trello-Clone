@@ -41,7 +41,10 @@ export default function BoardPage() {
                 setNewTitle(board?.title ?? "");
                 setNewColor(board?.color ?? "");
                 setIsEditingTitle(true)
-            }} />
+            }}
+                onFilterClick={() => { }}
+                filterCount={2}
+            />
             <Dialog open={isEditingTitle} onOpenChange={setIsEditingTitle}>
                 <DialogContent className="w-[95vw] max-w-[425px] mx-auto">
                     <DialogHeader>
@@ -74,8 +77,8 @@ export default function BoardPage() {
                                             "bg-teal-500",
                                             "bg-cyan-500",
                                             "bg-emerald-500",
-                                        ].map((color) => (
-                                            < button type="button" className={`w-8 h-8 rounded-full ${color} ${color === newColor ? "ring-2 ring-offset-2 ring-gray-900" : ""}`}
+                                        ].map((color, key) => (
+                                            < button key={key} type="button" className={`w-8 h-8 rounded-full ${color} ${color === newColor ? "ring-2 ring-offset-2 ring-gray-900" : ""}`}
                                                 onClick={() => setNewColor(color)}
                                             />
                                         ))
