@@ -26,7 +26,8 @@ export function useUserBoards() {
         try {
             setLoading(true);
             setError(null);
-            const data = await boardService.getBoard(supabase!, user.id)
+            // Change getBoard to getBoards (plural)
+            const data = await boardService.getBoards(supabase!, user.id)
             setBoards(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load boards.");
@@ -102,10 +103,21 @@ export function useBoard(boardId: string) {
         }
     }
 
+    async function updateBoard(boardId: string, updates: Partial<Board>) {
+        try {
+            const updateBoard = await boardService.updateBoard(supabase!, boardId, updates);
+            setBoard(updateBoard)
+            return updateBoard;
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Failed to update the board.");
+        }
+    }
+
     return {
         board,
         columns,
         loading,
         error,
+        updateBoard,
     }
 }

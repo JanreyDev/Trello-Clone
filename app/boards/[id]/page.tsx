@@ -8,12 +8,13 @@ import { Label } from "@/components/ui/label";
 import { useBoard } from "@/lib/hooks/userBoards"
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useParams } from "next/navigation";
+import { title } from "process";
 import { useState } from "react";
 
 
 export default function BoardPage() {
     const { id } = useParams<{ id: string }>();
-    const { board } = useBoard(id);
+    const { board, updateBoard } = useBoard(id);
 
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [newTitle, setNewTitle] = useState("");
@@ -26,10 +27,12 @@ export default function BoardPage() {
         if (!newTitle.trim() || !board) return;
 
         try {
-
-        } catch () {
-
-        }
+            await updateBoard(board.id, {
+                title: newTitle.trim(),
+                color: newColor || board.color
+            });
+            setIsEditingTitle(false);
+        } catch { }
     }
 
     return (
