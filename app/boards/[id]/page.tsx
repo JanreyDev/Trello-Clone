@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useBoard } from "@/lib/hooks/userBoards"
-import { DialogTitle } from "@radix-ui/react-dialog";
+import { DialogTitle, DialogTrigger } from "@radix-ui/react-dialog";
+import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { title } from "process";
 import { useState } from "react";
@@ -141,13 +144,64 @@ export default function BoardPage() {
             {/* Board Content */}
             <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
                 {/* stats */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-baseline mb-6 space-y-4 sm:space-y-0">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                         <div className="text-sm text-gray-600">
                             <span className="font-medium">Total Tasks:</span>
                             {columns.reduce((sum, col) => sum + col.tasks.length, 0)}
                         </div>
                     </div>
+
+                    {/* Add task Dialog */}
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="w-full sm:w-auto">
+                                <Plus />
+                                Add Task
+                            </Button>
+                        </DialogTrigger>
+
+                        <DialogContent className="w-[95vw] max-w-[425px] mx-auto">
+                            <DialogHeader>
+                                <DialogTitle>Create New Task</DialogTitle>
+                                <p className="text-sm text-gray-600">Add a task to the board</p>
+                            </DialogHeader>
+
+                            <form>
+                                <div>
+                                    <Label>Title *</Label>
+                                    <Input id="title" name="title" placeholder="Enter task title" />
+                                </div>
+
+                                <div>
+                                    <Label>Description</Label>
+                                    <Textarea id="description" name="description" placeholder="Enter task description" rows={3} />
+                                </div>
+
+                                <div>
+                                    <Label>Assignee</Label>
+                                    <Input id="assignee" name="assignee" placeholder="Who should do this ?" />
+                                </div>
+
+                                <div>
+                                    <Label>Priority</Label>
+                                    <Select name="priority" defaultValue="medium">
+                                        <SelectTrigger>
+                                            <SelectValue />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {["low", "medium", "high"].map((priority, key) => (
+                                                <SelectItem key={key} value={priority}>
+                                                    {priority.charAt(0).toLocaleUpperCase() + priority.slice(1)}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </main>
         </div>
