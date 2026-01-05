@@ -1,6 +1,7 @@
 "use client";
 
 import Navbar from "@/components/navbar"
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -8,16 +9,51 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useBoard } from "@/lib/hooks/userBoards"
+import { ColumnWithTasks } from "@/lib/supabase/models";
 import { DialogTitle, DialogTrigger } from "@radix-ui/react-dialog";
-import { Plus } from "lucide-react";
+import { Ghost, MoreHorizontal, Plus } from "lucide-react";
 import { useParams } from "next/navigation";
 import { title } from "process";
 import { useState } from "react";
 
+function Column({
+    column,
+    children,
+    onCreateTask,
+    onEditColumn,
+}: {
+    column: ColumnWithTasks;
+    children: React.ReactNode;
+    onCreateTask: (taskData: any) => Promise<void>;
+    onEditColumn: (column: ColumnWithTasks) => void;
+}) {
+    return (
+        <div className="w-full lg:flex-shrink-0 lg:w-80">
+            <div className="bg-white rounded-lg shadow-sm border">
+                {/* Column Header */}
+                <div className="p-3 sm:p-4 border-b">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2 min-w-0">
+                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{column.title}</h3>
+                            <Badge className="text-xs flex-shrink-0" variant="secondary">{column.tasks.length}</Badge>
+                        </div>
+                        <Button variant="ghost" size="sm" className="flex-shrink-0">
+                            <MoreHorizontal />
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Column Content */}
+                <div className="p-2">{children}</div>
+            </div>
+        </div>
+    )
+};
+
 
 export default function BoardPage() {
     const { id } = useParams<{ id: string }>();
-    const { board, updateBoard, columns } = useBoard(id);
+    const { board, updateBoard, columns, createRealTask } = useBoard(id);
 
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [newTitle, setNewTitle] = useState("");
@@ -39,6 +75,38 @@ export default function BoardPage() {
             });
             setIsEditingTitle(false);
         } catch { }
+    }
+
+    async function createTask(taskData: {
+        title: string;
+        description?: string;
+        assignee?: string;
+        dueDate?: string;
+        priority: "low" | "medium" | "high";
+    }) {
+        const targetColumn = columns[0]
+        if (!targetColumn) {
+            throw new Error("No Column available to add task")
+        }
+
+        await createRealTask(targetColumn.id, taskData)
+    }
+
+
+    async function handleCreateTask(e: any) {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget);
+        const taskData = {
+            title: formData.get('title') as string,
+            description: (formData.get('description') as string) || undefined,
+            assignee: (formData.get('assignee') as string) || undefined,
+            dueDate: (formData.get('dueDate') as string) || undefined,
+            priority: (formData.get('priority') as | "low" | "medium" | "high" || "medium"),
+        };
+
+        if (taskData.title.trim()) {
+            await createTask(taskData);
+        }
     }
 
     return (
@@ -147,7 +215,7 @@ export default function BoardPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
                     <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                         <div className="text-sm text-gray-600">
-                            <span className="font-medium">Total Tasks:</span>
+                            <span className="font-medium">Total Tasks: </span>
                             {columns.reduce((sum, col) => sum + col.tasks.length, 0)}
                         </div>
                     </div>
@@ -167,7 +235,7 @@ export default function BoardPage() {
                                 <p className="text-sm text-gray-600">Add a task to the board</p>
                             </DialogHeader>
 
-                            <form className="space-y-4">
+                            <form className="space-y-4" onSubmit={handleCreateTask}>
                                 <div className="space-y-2">
                                     <Label>Title *</Label>
                                     <Input id="title" name="title" placeholder="Enter task title" />
@@ -209,6 +277,23 @@ export default function BoardPage() {
                             </form>
                         </DialogContent>
                     </Dialog>
+                </div>
+
+
+                {/* Board Columns */}
+                <div>
+                    {columns.map((column, key) => (
+                        <Column key={key}
+                            column={column}
+                            onCreateTask={() => { }}
+                            onEditColumn={() => { }}>
+                            <div>
+                                {column.tasks.map((task, key) => (
+                                    <div>{task.title}</div>
+                                ))}
+                            </div>
+                        </Column>
+                    ))}
                 </div>
             </main>
         </div>
