@@ -167,23 +167,23 @@ export default function BoardPage() {
                                 <p className="text-sm text-gray-600">Add a task to the board</p>
                             </DialogHeader>
 
-                            <form>
-                                <div>
+                            <form className="space-y-4">
+                                <div className="space-y-2">
                                     <Label>Title *</Label>
                                     <Input id="title" name="title" placeholder="Enter task title" />
                                 </div>
 
-                                <div>
+                                <div className="space-y-2">
                                     <Label>Description</Label>
                                     <Textarea id="description" name="description" placeholder="Enter task description" rows={3} />
                                 </div>
 
-                                <div>
+                                <div className="space-y-2">
                                     <Label>Assignee</Label>
                                     <Input id="assignee" name="assignee" placeholder="Who should do this ?" />
                                 </div>
 
-                                <div>
+                                <div className="space-y-2">
                                     <Label>Priority</Label>
                                     <Select name="priority" defaultValue="medium">
                                         <SelectTrigger>
@@ -198,6 +198,13 @@ export default function BoardPage() {
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Due Date</Label>
+                                    <Input type="date" id="dueDate" name="dueDate" />
+                                </div>
+                                <div className="flex justify-end space-x-2 pt-4">
+                                    <Button type="submit">Create Task</Button>
                                 </div>
                             </form>
                         </DialogContent>
