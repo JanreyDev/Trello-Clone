@@ -17,7 +17,7 @@ import { useParams } from "next/navigation";
 import { getPriority } from "os";
 import { title } from "process";
 import { act, useState } from "react";
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, rectIntersection, useDroppable } from "@dnd-kit/core"
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, PointerSensor, rectIntersection, useDroppable, useSensor, useSensors } from "@dnd-kit/core"
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities"
 
@@ -239,6 +239,14 @@ export default function BoardPage() {
   const [isFilterOpen, setIsFIlterOpen] = useState(false);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+  const sensors = useSensors(useSensor(
+    PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+    }
+  }
+  ))
 
 
 
@@ -512,7 +520,7 @@ export default function BoardPage() {
 
         {/* Board Columns */}
         <DndContext
-          // sensors={ }
+          sensors={sensors}
           collisionDetection={rectIntersection}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
