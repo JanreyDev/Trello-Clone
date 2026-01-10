@@ -16,9 +16,9 @@ import { Calendar, Ghost, MoreHorizontal, Plus, User } from "lucide-react";
 import { useParams } from "next/navigation";
 import { getPriority } from "os";
 import { title } from "process";
-import { useState } from "react";
-import { DndContext, useDroppable } from "@dnd-kit/core"
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
+import { act, useState } from "react";
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, rectIntersection, useDroppable } from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities"
 
 function DroppableColumn({
@@ -121,6 +121,8 @@ function SortableTask({ task }: { task: Task }) {
 
   const styles = {
     transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
   }
 
   function getPriorityColor(priority: "low" | "medium" | "high"): string {
@@ -174,6 +176,58 @@ function SortableTask({ task }: { task: Task }) {
   )
 }
 
+
+function TaskOverlay({ task }: { task: Task }) {
+
+  function getPriorityColor(priority: "low" | "medium" | "high"): string {
+    switch (priority) {
+      case "high":
+        return "bg-red-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-green-500";
+      default:
+        return "bg-yellow-500";
+    }
+  }
+  return (
+    <Card className="cursor-pointer hover:shadow-md transition-shadow">
+      <CardContent className="p-3 sm:p-4">
+        <div className="space-y-2 sm:space-y-3">
+          {/* Task Header */}
+          <div className="flex items-start justify-between">
+            <h4 className="font-medium text-gray-900 text-sm leading-tight flex-1 min-w-0 pr-2">{task.title}</h4>
+          </div>
+          {/* Task Description */}
+          <p className="text-xs text-gray-600 line-clamp-2">{task.description || "No description."}</p>
+          {/* Task Data */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
+              {task.assignee && (
+                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                  <User className="h-3 w-3" />
+                  <span className="truncate">{task.assignee}</span>
+                </div>
+              )}
+
+              {task.due_date && (
+                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                  <Calendar className="h-3 w-3" />
+                  <span className="truncate">{task.due_date}</span>
+                </div>
+              )}
+            </div>
+
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getPriorityColor(task.priority)}`} />
+          </div>
+
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function BoardPage() {
   const { id } = useParams<{ id: string }>();
   const { board, updateBoard, columns, createRealTask } = useBoard(id);
@@ -183,6 +237,8 @@ export default function BoardPage() {
   const [newColor, setNewColor] = useState("");
 
   const [isFilterOpen, setIsFIlterOpen] = useState(false);
+
+  const [activeTask, setActiveTask] = useState<Task | null>(null)
 
 
 
@@ -233,6 +289,24 @@ export default function BoardPage() {
       const trigger = document.querySelector('[data-state="open"') as HTMLElement;
       if (trigger) trigger.click();
     }
+  }
+
+
+  function handleDragStart(event: DragStartEvent) {
+    const taskId = event.active.id as string;
+    const task = columns.flatMap((col) => col.tasks).find((task) => task.id === taskId);
+
+    if (task) {
+      setActiveTask(task)
+    }
+  }
+
+  function handleDragOver(event: DragOverEvent) {
+
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+
   }
 
   return (
@@ -408,11 +482,11 @@ export default function BoardPage() {
 
         {/* Board Columns */}
         <DndContext
-        // sensors={ }
-        // collisionDetection={ }
-        // onDragStart={ }
-        // onDragOver={ }
-        // onDragEnd={ }
+          // sensors={ }
+          collisionDetection={rectIntersection}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
         >
           <div className="flex flex-col lg:flex-row lg:space-x-6 lg:overflow-x-auto lg:pb-6 lg:px-2 lg:-mx-2 lg:[&::-webkit-scrollbar]:h-2
                     lg:[&::-webkit-scrollbar-track]:bg-gray-100
@@ -425,7 +499,7 @@ export default function BoardPage() {
                 onEditColumn={() => { }}>
 
                 <SortableContext items={column.tasks.map((task) => task.id)}
-                //  strategy={}   
+                  strategy={verticalListSortingStrategy}
                 >
                   <div className="space-y-3">
                     {column.tasks.map((task, key) => (
@@ -435,6 +509,10 @@ export default function BoardPage() {
                 </SortableContext>
               </DroppableColumn>
             ))}
+
+            <DragOverlay>
+              {activeTask ? <TaskOverlay task={activeTask} /> : null}
+            </DragOverlay>
           </div>
         </DndContext>
       </main>
