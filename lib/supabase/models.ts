@@ -31,7 +31,6 @@ export interface Task {
     due_date: string | null;
     sort_order: number;
     created_at: string;
-    updated_at: string;
     priority: 'low' | 'medium' | 'high';
 }
 
