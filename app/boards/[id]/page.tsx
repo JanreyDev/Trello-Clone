@@ -357,7 +357,17 @@ export default function BoardPage() {
         await moveTask(taskId, targetColumn.id, targetColumn.tasks.length);
       }
     } else {
+      const sourceColumn = columns.find((col) => col.tasks.some((task) => task.id === taskId));
+      const targetColumn = columns.find((col) => col.tasks.some((task) => task.id === overId));
 
+      if (sourceColumn && targetColumn) {
+        const oldIndex = sourceColumn.tasks.findIndex((task) => task.id === taskId);
+        const newIndex = targetColumn.tasks.findIndex((task) => task.id === overId);
+
+        if (oldIndex !== newIndex) {
+          await moveTask(taskId, targetColumn.id, newIndex);
+        }
+      }
     }
   }
 
